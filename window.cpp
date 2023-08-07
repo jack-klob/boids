@@ -122,12 +122,9 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     float positions[6] = {
-        -0.5f,
-        -0.5f,
-        0.0f,
-        0.5f,
-        0.5f,
-        -0.5f,
+        -0.5f, -0.5f,
+         0.0f,  0.5f,
+         0.5f, -0.5f,
     };
 
     unsigned int buffer;
@@ -135,15 +132,12 @@ int main(void)
     // selecting is called binding
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     // need to put data into buffer
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-    std::cout << source.VertexSource << '\n';
-    std::cout << source.FragmentSource << '\n';
 
     // need to tell openGL how data in buffer is laid out
 
@@ -156,8 +150,22 @@ int main(void)
     glUseProgram(shader);
 
     /* Loop until the user closes the window */
+    const float increment = 0.0001f;
     while (!glfwWindowShouldClose(window))
     {
+        if(positions[2] < 1)
+        {
+            positions[2] += increment;
+        }
+        else
+        {
+            positions[2] = 0.0f;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        // can use glBufferSubData to replace data in the vertex buffer
+        glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * sizeof(float), positions);
+
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
