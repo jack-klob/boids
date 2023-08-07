@@ -10,7 +10,7 @@
  pkg_search_module(GLFW REQUIRED glfw3)
 
  # Define a program target called window.
- add_executable(window window.cpp)
+ add_executable(window window.cpp shader.cpp)
 
  # Set the includes and libraries for the window target.
  target_include_directories(window PUBLIC ${GLFW_INCLUDE_DIRS})
