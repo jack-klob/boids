@@ -103,9 +103,6 @@ int main(void)
     GLuint shader = loadShaders("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     glUseProgram(shader);
 
-    GLuint colour_loc = glGetUniformLocation(shader, "u_colour");
-    glUniform4f(colour_loc, 0.8f, 0.3f, 0.8f, 1.0f);
-
     GLuint proj_loc = glGetUniformLocation(shader, "u_proj");
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj(0,0));
 
