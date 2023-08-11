@@ -100,19 +100,24 @@ void Flock::update(float dt)
             // implement alignment
             vec2 avg_vel{0,0};
             vec2 avg_pos{0, 0};
+            vec2 avoidance{0, 0};
             for(auto n : neighbors)
             {
                 avg_vel += velocities_[n];
                 avg_pos += positions_[n];
+
+                avoidance += positions_[i] - positions_[n];
             }
             avg_vel /= neighbors.size();
             avg_pos /= neighbors.size();
 
             GLfloat alignment_factor = 0.005f;
-            GLfloat cohesion_factor = 0.0000005f;
+            GLfloat cohesion_factor = 0.005f;
+            GLfloat avoidance_factor = 0.005f;
 
             velocities_[i] += (avg_vel - velocities_[i]) * alignment_factor;
             velocities_[i] += (avg_pos - velocities_[i]) * cohesion_factor;
+            velocities_[i] += avoidance * avoidance_factor;
         }
 
         // if the boid is out of the screen, have it want to come to the center
