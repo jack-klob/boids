@@ -13,7 +13,7 @@ public:
 
     void nudge_inside_margin(unsigned int i, GLfloat nudge_factor);
 
-    void update();
+    void update(float dt);
 
     void draw() const;
 

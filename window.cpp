@@ -5,6 +5,7 @@
 #include "flock.h"
 #include "gl_math.h"
 #include <chrono>
+#include <iostream>
 
 class FrameLimiter
 {
@@ -14,20 +15,29 @@ public:
     bool should_update()
     {
         auto now = std::chrono::steady_clock::now();
-        auto dt = now - prev_update;
+        dt_ = now - prev_update_;
 
-        if(dt > std::chrono::duration<float>(1.f / fps_))
+        if(dt_ > std::chrono::duration<float>(1.f / fps_))
         {
-            prev_update = now;
+            prev_update_ = now;
             return true;
         }
 
         return false;
     }
 
+    float frame_dt() const
+    {
+        // return frame time difference in seconds.
+        return dt_.count();
+    }
+
+    
+
 private:
     unsigned int fps_;
-    std::chrono::steady_clock::time_point prev_update = std::chrono::steady_clock::now();
+    std::chrono::duration<float> dt_;
+    std::chrono::steady_clock::time_point prev_update_ = std::chrono::steady_clock::now();
 };
 
 int main(void)
@@ -87,7 +97,7 @@ int main(void)
 
         if(limiter.should_update())
         {
-            flock.update();
+            flock.update(limiter.frame_dt());
         }
         flock.draw();
 

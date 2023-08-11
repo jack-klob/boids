@@ -8,9 +8,9 @@ void Flock::create_data()
     // facing to the right so rotation angles do not need adjusting
      GLfloat base_tri[] = 
     {
-        -15.f,  10.f,
-        -15.f, -10.f,
-         10.f,   0.f,
+        -7.5f,  5.f,
+        -7.5f, -5.f,
+         5.f,   0.f,
     };
     
     // buffer for base triangle
@@ -74,7 +74,7 @@ bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_
     return false;
 }
 
-void Flock::update()
+void Flock::update(float dt)
 {
     for (unsigned int i = 0; i < count_; ++i)
     {
@@ -118,10 +118,10 @@ void Flock::update()
         // if the boid is out of the screen, have it want to come to the center
         // implement a margin from the outside of the screen
         // boids outside margin are nudged back inside
-        nudge_inside_margin(i, 0.05);
+        nudge_inside_margin(i, 1);
 
         // update position of boid with veloctity
-        positions_[i] += velocities_[i];
+        positions_[i] += velocities_[i] * dt;
         // update rotation of boid
         rotations_[i] = rotation_matrix(std::atan2(velocities_[i][1], velocities_[i][0]));
     }
@@ -147,9 +147,10 @@ Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(
         positions_[i][0] = 800.f * rng(generator);
         positions_[i][1] = 800.f * rng(generator);
 
-        // random starting velocities in range [-0.5, 0.5]
-        velocities_[i][0] = 4.f * (rng(generator) - 0.5f);
-        velocities_[i][1] = 4.f * (rng(generator) - 0.5f);
+        // random starting value for velocity
+        // velocity in pixels/sec
+        velocities_[i][0] = 400.f * (2.f * (rng(generator) - 0.5f));
+        velocities_[i][1] = 400.f * (2.f * (rng(generator) - 0.5f));
     }
 
     create_data();
