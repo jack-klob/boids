@@ -11,7 +11,7 @@ public:
 
     Flock(unsigned int count, unsigned int seed = 0);
 
-    bool is_outside_screen(unsigned int i) const;
+    void nudge_inside_margin(unsigned int i, GLfloat nudge_factor);
 
     void update();
 
@@ -21,6 +21,8 @@ private:
     void create_data();
 
     void update_draw_data() const;
+
+    bool within_sight(unsigned int source, unsigned int other, GLfloat sight_distance, GLfloat sight_angle) const;
 
 private:
     unsigned int count_;

@@ -1,10 +1,5 @@
 #include "flock.h"
-#include "boost/numeric/ublas/io.hpp"
 #include <random>
-#include <iostream>
-#include <cassert>
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 
 // create buffer for drawing the boids
 void Flock::create_data()
@@ -64,25 +59,69 @@ void Flock::update_draw_data() const
     glNamedBufferSubData(rotation_buffer_, 0, count_ * sizeof(mat2), rotations_.data());
 }
 
+// determine if the other boid can be seen by the source boid based on its sight parameters
+bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_distance, GLfloat sight_angle) const
+{
+    auto diff = positions_[source] - positions_[other];
+    if(abs(diff[0]) < sight_distance && abs(diff[1]) < sight_distance)
+    {
+        if (diff.squared_mag() < sight_distance * sight_distance)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void Flock::update()
 {
     for (unsigned int i = 0; i < count_; ++i)
     {
-        // find boids in neighboring area
-        // assume for now that all boids are considered
+
+        std::vector<unsigned int> neighbors{};
+        GLfloat sight_distance = 40.f;
+        GLfloat sight_angle = 360.f;
+
+        // find all neighbors of the given boid within the sight distance and angle
+        for (unsigned int j = 0; j < count_; ++j)
+        {   
+            if(j == i)
+                continue;
+
+            if(within_sight(i, j, sight_distance, sight_angle))
+            {
+                neighbors.push_back(j);
+            }
+        }
+
+        if(neighbors.size())
+        {
+            // implement alignment
+            vec2 avg_vel{0,0};
+            vec2 avg_pos{0, 0};
+            for(auto n : neighbors)
+            {
+                avg_vel += velocities_[n];
+                avg_pos += positions_[n];
+            }
+            avg_vel /= neighbors.size();
+            avg_pos /= neighbors.size();
+
+            GLfloat alignment_factor = 0.005f;
+            GLfloat cohesion_factor = 0.0000005f;
+
+            velocities_[i] += (avg_vel - velocities_[i]) * alignment_factor;
+            velocities_[i] += (avg_pos - velocities_[i]) * cohesion_factor;
+        }
 
         // if the boid is out of the screen, have it want to come to the center
-        // currently very crude
-        // also there is no limit on velocity so boids can speed up forever
-        if(is_outside_screen(i))
-        {
-            vec2 nudge = {400.f - positions_[i][0], 400.f - positions_[i][1]};
-            velocities_[i] += nudge / nudge.mag();
-        }
+        // implement a margin from the outside of the screen
+        // boids outside margin are nudged back inside
+        nudge_inside_margin(i, 0.05);
 
         // update position of boid with veloctity
         positions_[i] += velocities_[i];
-
         // update rotation of boid
         rotations_[i] = rotation_matrix(std::atan2(velocities_[i][1], velocities_[i][0]));
     }
@@ -109,17 +148,28 @@ Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(
         positions_[i][1] = 800.f * rng(generator);
 
         // random starting velocities in range [-0.5, 0.5]
-        velocities_[i][0] = 1.f * (rng(generator) - 0.5f);
-        velocities_[i][1] = 1.f * (rng(generator) - 0.5f);
+        velocities_[i][0] = 4.f * (rng(generator) - 0.5f);
+        velocities_[i][1] = 4.f * (rng(generator) - 0.5f);
     }
 
     create_data();
 }
 
-bool Flock::is_outside_screen(unsigned int i) const
+void Flock::nudge_inside_margin(unsigned int i, GLfloat nudge_factor)
 {
     auto px = positions_[i][0];
     auto py = positions_[i][1];
 
-    return px < 0 || px > 800 || py < 0 || py > 800;
+    vec2 nudge{0, 0};
+    if(px < 100)
+        nudge[0] = 1;
+    else if(px > 700)
+        nudge[0] = -1;
+
+    if(py < 100)
+        nudge[1] = 1;
+    else if(py > 700)
+        nudge[1] = -1;
+
+    velocities_[i] += nudge * nudge_factor;
 }

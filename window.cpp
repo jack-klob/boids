@@ -76,8 +76,9 @@ int main(void)
     GLuint proj_loc = glGetUniformLocation(shader, "u_proj");
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj[0][0]);
 
-    FrameLimiter limiter(120);
+    FrameLimiter limiter(60);
     Flock flock(200);
+
 
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
@@ -86,9 +87,6 @@ int main(void)
 
         if(limiter.should_update())
         {
-            // currently update is not dependent on the time step
-            // flock will move the same amount for every frame
-            // may be changed in future
             flock.update();
         }
         flock.draw();
