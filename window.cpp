@@ -66,7 +66,6 @@ int main(void)
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    Flock flock(100);
 
     // create and use shaders
     GLuint shader = loadShaders("res/shaders/vertex.shader", "res/shaders/fragment.shader");
@@ -75,9 +74,10 @@ int main(void)
     // project to pixel space
     auto proj = make_ortho(0.f, 800.f, 0.f, 800.f);
     GLuint proj_loc = glGetUniformLocation(shader, "u_proj");
-    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj(0, 0));
+    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj[0][0]);
 
     FrameLimiter limiter(120);
+    Flock flock(200);
 
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))

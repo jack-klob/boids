@@ -5,11 +5,17 @@
 #include "boost/numeric/ublas/io.hpp"
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/storage.hpp>
+#include <array>
+#include <GL/glew.h>
 
-using vec2 = boost::numeric::ublas::bounded_vector<float, 2>;
+using bvec2 = boost::numeric::ublas::bounded_vector<GLfloat, 2>;
 // matrix is stored in column major order as openGL expects
-using mat2 = boost::numeric::ublas::bounded_matrix<float, 2, 2, boost::numeric::ublas::column_major>;
-using mat4 = boost::numeric::ublas::bounded_matrix<float, 4, 4, boost::numeric::ublas::column_major>;
+using bmat2 = boost::numeric::ublas::bounded_matrix<GLfloat, 2, 2, boost::numeric::ublas::column_major>;
+using bmat4 = boost::numeric::ublas::bounded_matrix<GLfloat, 4, 4, boost::numeric::ublas::column_major>;
+
+using vec2 = std::array<GLfloat, 2>;
+using mat2 = std::array<std::array<GLfloat, 2>, 2>;
+using mat4 = std::array<std::array<GLfloat, 4>, 4>;
 
 mat4 make_ortho(const float left, const float right, const float bottom, const float top);
 
