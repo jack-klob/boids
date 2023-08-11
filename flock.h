@@ -10,15 +10,23 @@ class Flock
     using vec2 = boost::numeric::ublas::bounded_vector<float, 2>;
 
 public:
-    void createData() const;
+
+    Flock(unsigned int count, unsigned int seed = 0);
+
+    void update();
 
     void draw() const;
 
-    Flock(unsigned int count, unsigned int seed = 0);
+private:
+    void createData();
+
+    void updateDrawData() const;
 
 private:
     unsigned int count_;
     std::vector<vec2> positions_;
+    std::vector<vec2> velocities_;
+    std::vector<vec2> rotations_;
     GLuint trans_buffer_;
 };
 

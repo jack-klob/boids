@@ -4,6 +4,31 @@
 #include "shader.h"
 #include "flock.h"
 #include "gl_math.h"
+#include <chrono>
+
+class FrameLimiter
+{
+public:
+    FrameLimiter(unsigned int fps) : fps_(fps) {}
+
+    bool should_update()
+    {
+        auto now = std::chrono::steady_clock::now();
+        auto dt = now - prev_update;
+
+        if(dt > std::chrono::duration<float>(1.f / fps_))
+        {
+            prev_update = now;
+            return true;
+        }
+
+        return false;
+    }
+
+private:
+    unsigned int fps_;
+    std::chrono::steady_clock::time_point prev_update = std::chrono::steady_clock::now();
+};
 
 int main(void)
 {
@@ -42,7 +67,6 @@ int main(void)
     glBindVertexArray(vao);
 
     Flock flock(100);
-    flock.createData();
 
     // create and use shaders
     GLuint shader = loadShaders("res/shaders/vertex.shader", "res/shaders/fragment.shader");
@@ -51,16 +75,26 @@ int main(void)
     // project to pixel space
     auto proj = make_ortho(0.f, 800.f, 0.f, 800.f);
     GLuint proj_loc = glGetUniformLocation(shader, "u_proj");
-    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj(0,0));
+    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj(0, 0));
+
+    FrameLimiter limiter(120);
 
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
+
+        if(limiter.should_update())
+        {
+            // currently update is not dependent on the time step
+            // flock will move the same amount for every frame
+            // may be changed in future
+            flock.update();
+        }
         flock.draw();
 
         glfwSwapBuffers(window); // swap front and back buffers
-        glfwPollEvents(); // poll and process events
+        glfwPollEvents();        // poll and process events
     }
 
     glDeleteProgram(shader);

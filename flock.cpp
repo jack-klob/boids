@@ -4,7 +4,7 @@
 #include <iostream>
 
 // create buffer for drawing the boids
-void Flock::createData() const
+void Flock::createData()
 {
     // defining the shape for a boid
     GLfloat base_tri[] = 
@@ -26,10 +26,9 @@ void Flock::createData() const
 
     // transform buffer
     // positions will be loaded into this buffer for every frame
-    GLuint trans_buffer;
-    glGenBuffers(1, &trans_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, trans_buffer);
-    glBufferData(GL_ARRAY_BUFFER, 2 * count_ * sizeof(GLfloat), positions_.data(), GL_STATIC_DRAW);
+    glGenBuffers(1, &trans_buffer_);
+    glBindBuffer(GL_ARRAY_BUFFER, trans_buffer_);
+    glBufferData(GL_ARRAY_BUFFER, count_ * sizeof(vec2), positions_.data(), GL_DYNAMIC_DRAW);
 
     // this says that the layout for "transform" is located at location 1
     // layout = 1 can then be accessed from the shader
@@ -43,7 +42,24 @@ void Flock::draw() const
     glDrawArraysInstanced(GL_TRIANGLES, 0, 3, count_);
 }
 
-Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(count)
+void Flock::updateDrawData() const
+{
+    glNamedBufferSubData(trans_buffer_, 0, count_ * sizeof(vec2), positions_.data());
+}
+
+void Flock::update()
+{
+    // for every boid in flock, update position with velocity
+    for (unsigned int i = 0; i < count_; ++i)
+    {
+        positions_[i](0) += velocities_[i](0);
+        positions_[i](1) += velocities_[i](1);
+    }
+
+    updateDrawData();
+}
+
+Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(count), velocities_(count)
 {
     // generate random starting positions for agents in flock
     std::random_device rd;
@@ -54,9 +70,17 @@ Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(
     }
     std::uniform_real_distribution<float> rng(0.f, 1.f);
 
-    for (auto &pos : positions_)
+    // initialize random positions and velocities
+    for (unsigned int i = 0; i < count_; ++i)
     {
-        pos(0) = 800.f * rng(generator);
-        pos(1) = 800.f * rng(generator);
+        // random starting position within window
+        positions_[i](0) = 800.f * rng(generator);
+        positions_[i](1) = 800.f * rng(generator);
+
+        // random starting velocities in range [0, .5]
+        velocities_[i](0) = 0.5f * rng(generator);
+        velocities_[i](1) = 0.5f * rng(generator);
     }
+
+    createData();
 }
