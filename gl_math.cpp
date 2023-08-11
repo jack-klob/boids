@@ -1,8 +1,6 @@
 #include "gl_math.h"
 #include <cmath>
 
-using namespace boost::numeric::ublas;
-
 mat4 make_ortho(const float left, const float right, const float bottom, const float top)
 {
     const float near = -1.0f;
@@ -17,7 +15,7 @@ mat4 make_ortho(const float left, const float right, const float bottom, const f
     m[1][1] = 2.0f / (top - bottom);
     m[1][2] = 0.f;
     m[1][3] = 0.f;
-    
+
     m[2][0] = 0.f;
     m[2][1] = 0.f;
     m[2][2] = -2.f / (far - near);
@@ -43,4 +41,82 @@ mat2 rotation_matrix(const float theta)
     m[1][1] = cos_theta;
 
     return m;
+}
+
+vec2::vec2() : data_() {}
+
+vec2::vec2(const vec2 &other) : data_(other.data_) {}
+
+vec2::vec2(GLfloat x, GLfloat y) : data_()
+{
+    data_[0] = x;
+    data_[1] = y;
+}
+
+GLfloat vec2::operator[](int i) const
+{
+    return data_[i];
+}
+
+GLfloat& vec2::operator[](int i)
+{
+    return data_[i];
+}
+
+vec2 &vec2::operator+=(const vec2 rhs)
+{
+    data_[0] += rhs.data_[0];
+    data_[1] += rhs.data_[1];
+    return *this;
+}
+
+vec2 &vec2::operator-=(const vec2 rhs)
+{
+    data_[0] -= rhs.data_[0];
+    data_[1] -= rhs.data_[1];
+    return *this;
+}
+
+vec2 &vec2::operator*=(GLfloat rhs)
+{
+    data_[0] *= rhs;
+    data_[1] *= rhs;
+    return *this;
+}
+
+vec2 &vec2::operator/=(GLfloat rhs)
+{
+    data_[0] /= rhs;
+    data_[1] /= rhs;
+    return *this;
+}
+
+vec2 vec2::operator+(const vec2 &rhs) const
+{
+    return vec2(*this) += rhs;
+}
+
+vec2 vec2::operator-(const vec2 rhs) const
+{
+    return vec2(*this) -= rhs;
+}
+
+vec2 vec2::operator*(GLfloat rhs) const
+{
+    return vec2(*this) *= rhs;
+}
+
+vec2 vec2::operator/(GLfloat rhs) const
+{
+    return vec2(*this) /= rhs;
+}
+
+GLfloat vec2::squared_mag() const
+{
+    return data_[0] * data_[0] + data_[1] * data_[1];
+}
+
+GLfloat vec2::mag() const
+{
+    return std::sqrt(squared_mag());
 }

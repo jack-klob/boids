@@ -2,6 +2,7 @@
 #define flock_hpp
 
 #include "gl_math.h"
+#include <vector>
 #include <GL/glew.h>
 
 class Flock
@@ -10,14 +11,16 @@ public:
 
     Flock(unsigned int count, unsigned int seed = 0);
 
+    bool is_outside_screen(unsigned int i) const;
+
     void update();
 
     void draw() const;
 
 private:
-    void createData();
+    void create_data();
 
-    void updateDrawData() const;
+    void update_draw_data() const;
 
 private:
     unsigned int count_;

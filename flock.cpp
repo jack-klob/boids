@@ -7,7 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 // create buffer for drawing the boids
-void Flock::createData()
+void Flock::create_data()
 {
     // defining the shape for a boid
     // facing to the right so rotation angles do not need adjusting
@@ -58,7 +58,7 @@ void Flock::draw() const
     glDrawArraysInstanced(GL_TRIANGLES, 0, 3, count_);
 }
 
-void Flock::updateDrawData() const
+void Flock::update_draw_data() const
 {
     glNamedBufferSubData(trans_buffer_, 0, count_ * sizeof(vec2), positions_.data());
     glNamedBufferSubData(rotation_buffer_, 0, count_ * sizeof(mat2), rotations_.data());
@@ -68,15 +68,26 @@ void Flock::update()
 {
     for (unsigned int i = 0; i < count_; ++i)
     {
+        // find boids in neighboring area
+        // assume for now that all boids are considered
+
+        // if the boid is out of the screen, have it want to come to the center
+        // currently very crude
+        // also there is no limit on velocity so boids can speed up forever
+        if(is_outside_screen(i))
+        {
+            vec2 nudge = {400.f - positions_[i][0], 400.f - positions_[i][1]};
+            velocities_[i] += nudge / nudge.mag();
+        }
+
         // update position of boid with veloctity
-        positions_[i][0] += velocities_[i][0];
-        positions_[i][1] += velocities_[i][1];
+        positions_[i] += velocities_[i];
 
         // update rotation of boid
         rotations_[i] = rotation_matrix(std::atan2(velocities_[i][1], velocities_[i][0]));
     }
 
-    updateDrawData();
+    update_draw_data();
 }
 
 Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(count), velocities_(count), rotations_(count)
@@ -97,10 +108,18 @@ Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(
         positions_[i][0] = 800.f * rng(generator);
         positions_[i][1] = 800.f * rng(generator);
 
-        // random starting velocities in range [0, .5]
+        // random starting velocities in range [-0.5, 0.5]
         velocities_[i][0] = 1.f * (rng(generator) - 0.5f);
         velocities_[i][1] = 1.f * (rng(generator) - 0.5f);
     }
 
-    createData();
+    create_data();
+}
+
+bool Flock::is_outside_screen(unsigned int i) const
+{
+    auto px = positions_[i][0];
+    auto py = positions_[i][1];
+
+    return px < 0 || px > 800 || py < 0 || py > 800;
 }
