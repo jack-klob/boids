@@ -8,6 +8,7 @@ constexpr GLfloat MAX_SPEED = 400.f;           // the max speed of a boid
 constexpr GLfloat MIN_SPEED = 200.f;           // the min speed of a boid
 constexpr GLfloat SCREEN_MARGIN = 250.f;       // if not wrapping, the distance to the edge of a screen before boid is nudge away
 constexpr GLfloat SCREEN_NUDGE_WEIGHT = 7.f;   // weight to nudge a boid away from edge of screen
+constexpr GLfloat RULE_SCALE_FACTOR = 20.f;    // the base scale factor for any influence of a rule
 
 void Flock::create_draw_data()
 {
@@ -98,11 +99,11 @@ void Flock::apply_rules_to_boid(unsigned int i)
         avg_heading /= neighbors.size();
 
         // apply cohesion
-        velocities_[i] += ((avg_pos - positions_[i]).normalize() * 100.f * params_.cohesion_factor).limit(MAX_FORCE);
+        velocities_[i] += ((avg_pos - positions_[i]).normalize() * RULE_SCALE_FACTOR * params_.cohesion_factor).limit(MAX_FORCE);
         // apply alignment
-        velocities_[i] += ((avg_heading - velocities_[i]).normalize() * 100.f * params_.alignment_factor).limit(MAX_FORCE);
+        velocities_[i] += ((avg_heading - velocities_[i]).normalize() * RULE_SCALE_FACTOR * params_.alignment_factor).limit(MAX_FORCE);
         // apply separation
-        velocities_[i] += (repel.normalize() * 100.f * params_.separation_factor).limit(MAX_FORCE);
+        velocities_[i] += (repel.normalize() * RULE_SCALE_FACTOR * params_.separation_factor).limit(MAX_FORCE);
     }
 
     params_.wrap ? wrap(i) : nudge_inside_margin(i);
