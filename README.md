@@ -18,6 +18,11 @@ The following command is used to run the application
 $INSTALL_DIR/bin/flock
 ```
 
+A help screen can be displayed with
+```
+$INSTALL_DIR/bin/flock --help
+```
+
 A demo script can be run with
 ```
 $INSTALL_DIR/bin/demo
