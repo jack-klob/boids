@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
     }
 
     // create and use shaders
-    GLuint shader = loadShaders("../res/shaders/vertex.shader", "../res/shaders/fragment.shader");
+    GLuint shader = loadShaders("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     glUseProgram(shader);
 
     // project to pixel space

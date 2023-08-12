@@ -198,12 +198,12 @@ void Flock::wrap(unsigned int i)
     auto &py = positions_[i][1];
 
     if(px < 0)
-        px = 800.f;
-    else if(px > 800)
+        px = params_.width;
+    else if(px > params_.width)
         px = 0.f;
     else if(py < 0)
-        py = 800.f;
-    else if(py > 800)
+        py = params_.height;
+    else if(py > params_.height)
         py = 0.f;
 }
 
@@ -211,16 +211,17 @@ void Flock::nudge_inside_margin(unsigned int i, GLfloat nudge_factor, GLfloat ma
 {
     auto px = positions_[i][0];
     auto py = positions_[i][1];
+    GLfloat margin = 250;
 
     vec2 nudge{0, 0};
-    if(px < 250)
+    if(px < margin)
         nudge[0] = 1;
-    else if(px > 550)
+    else if(px > params_.width - margin)
         nudge[0] = -1;
 
-    if(py < 250)
+    if(py < margin)
         nudge[1] = 1;
-    else if(py > 550)
+    else if(py > params_.height - margin)
         nudge[1] = -1;
 
     velocities_[i] += (nudge.normalize() * nudge_factor).limit(max_force);
