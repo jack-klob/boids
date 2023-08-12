@@ -125,7 +125,10 @@ vec2 &vec2::limit(GLfloat lim)
 
 vec2 &vec2::normalize()
 {
-    (*this) /= mag();
+    auto length = mag();
+    if(length)
+        (*this) /= length;
+    
     return *this;
 }
 
