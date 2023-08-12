@@ -137,12 +137,12 @@ int main(int argc, char* argv[])
     }
 
     // create and use shaders
-    GLuint shader = loadShaders("res/shaders/vertex.shader", "res/shaders/fragment.shader");
-    glUseProgram(shader);
+    GLuint shader_program = create_shader_program();
+    glUseProgram(shader_program);
 
     // project to pixel space
     auto proj = make_ortho(0.f, params.width, 0.f, params.height);
-    GLuint proj_loc = glGetUniformLocation(shader, "u_proj");
+    GLuint proj_loc = glGetUniformLocation(shader_program, "u_proj");
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj[0][0]);
 
     FrameLimiter limiter(60);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
         glfwPollEvents();        // poll and process events
     }
 
-    glDeleteProgram(shader);
+    glDeleteProgram(shader_program);
     glfwTerminate();
     return 0;
 }

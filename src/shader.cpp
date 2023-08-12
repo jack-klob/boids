@@ -3,28 +3,39 @@
 #include <sstream>
 #include <iostream>
 
-std::string readFile(const char* file_path)
+// store shader code as strings so executable does not rely on external files
+// more practical for the way the application is being built and executed
+inline const char *vertex_source = 
+    R"(
+        #version 450
+        layout(location=0) in vec2 position;
+        layout(location=1) in vec2 translate;
+        layout(location=2) in mat2 rotation;
+
+        uniform mat4 u_proj;
+
+
+        void main()
+        {
+        gl_Position = u_proj * vec4((rotation * position) + translate, 0, 1);
+        }
+    )";
+
+inline const char *fragment_source =
+    R"(
+        #version 330 core
+        layout(location=0) out vec4 color;
+
+        void main()
+        {
+            color = vec4(0.5, 1.0, 0.8, 0.8);
+        }
+    )";
+
+GLuint compile_shader(GLuint type, const char* source_code)
 {
-    // read in data from provided path
-    std::ifstream file(file_path);
-    std::string line;
-    std::stringstream ss;
-
-    while (getline(file, line))
-    {
-        ss << line << '\n';
-    }
-
-    return ss.str();
-}
-
-GLuint compileShader(GLuint type, const char* file_path)
-{
-    std::string data = readFile(file_path);
-    const char *shader_src = data.c_str();
-
     GLuint shaderID = glCreateShader(type);
-    glShaderSource(shaderID, 1, &shader_src, nullptr);
+    glShaderSource(shaderID, 1, &source_code, nullptr);
     glCompileShader(shaderID);
 
     int success;
@@ -32,7 +43,7 @@ GLuint compileShader(GLuint type, const char* file_path)
 
     if (success == GL_FALSE)
     {
-        std::cout << "Error compiling shader from path: " << file_path << '\n';
+        std::cout << "Error compiling shader\n";
         glDeleteShader(shaderID);
         exit(1);
     }
@@ -40,14 +51,14 @@ GLuint compileShader(GLuint type, const char* file_path)
     return shaderID;
 }
 
-GLuint loadShaders(const char *vertex_path, const char *fragment_path)
+GLuint create_shader_program()
 {
     // need a program to attach the shaders to
     GLuint programID = glCreateProgram();
 
     // compile the shaders from files
-    GLuint vertex_shaderID = compileShader(GL_VERTEX_SHADER, vertex_path);
-    GLuint fragment_shaderID = compileShader(GL_FRAGMENT_SHADER, fragment_path);
+    GLuint vertex_shaderID = compile_shader(GL_VERTEX_SHADER, vertex_source);
+    GLuint fragment_shaderID = compile_shader(GL_FRAGMENT_SHADER, fragment_source);
 
     // attach the shaders to the program
     glAttachShader(programID, vertex_shaderID);

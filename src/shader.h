@@ -3,21 +3,14 @@
 #include <GL/glew.h>
 #include <string>
 
-/// @brief read data from a file
-/// @param file_path the path of the file to read
-/// @return a string containing the file data
-std::string readFile(const char *file_path);
-
 /// @brief compile a shader
 /// @param type the type of shader to compile
-/// @param file_path the path of the file containing the shader code
+/// @param source_code source code for the shader to compile
 /// @return the id of the created shader
-GLuint compileShader(GLuint type, const char *file_path);
+GLuint compile_shader(GLuint type, const char *source_code);
 
-/// @brief load and use shaders
-/// @param vertex_path path to vertex shader code
-/// @param fragment_path path to fragment shader code
+/// @brief create shader program with vertex and fragment shader
 /// @return the id of the created program
-GLuint loadShaders(const char *vertex_path, const char *fragment_path);
+GLuint create_shader_program();
 
 #endif
