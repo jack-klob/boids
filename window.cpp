@@ -16,9 +16,9 @@ public:
     bool should_update()
     {
         auto now = std::chrono::steady_clock::now();
-        dt_ = now - prev_update_;
+        auto dt = now - prev_update_;
 
-        if(dt_ > std::chrono::duration<float>(1.f / fps_))
+        if(dt > std::chrono::duration<float>(1.f / fps_))
         {
             prev_update_ = now;
             return true;
@@ -29,13 +29,13 @@ public:
 
     float frame_dt() const
     {
-        // return frame time difference in seconds.
-        return dt_.count();
+        // return hard coded frame dt
+        // less accurate but must be done for simulations to be repeatable with same seed
+        return 1.f / fps_;
     }
 
 private:
     unsigned int fps_;
-    std::chrono::duration<float> dt_;
     std::chrono::steady_clock::time_point prev_update_ = std::chrono::steady_clock::now();
 };
 
@@ -66,7 +66,7 @@ parameters handle_arguments(int argc, char* argv[])
             ("cohesion", po::value<float>(&params.cohesion_factor)->default_value(0.5f)->notifier(range(0.f, 1.f, "cohesion")), "set cohesion factor | range [0.0, 1.0]")
             ("alignment", po::value<float>(&params.alignment_factor)->default_value(0.5f)->notifier(range(0.f, 1.f, "alignment")), "set alignment factor | range [0.0, 1.0]" )
             ("separation", po::value<float>(&params.separation_factor)->default_value(0.5f)->notifier(range(0.f, 1.f, "separation")), "set separation factor | range [0.0, 1.0]")
-            ("n", po::value<std::size_t>(&params.n)->default_value(50), "number of boids")
+            ("n", po::value<int>(&params.n)->default_value(50)->notifier(range(1, INFINITY, "n")), "number of boids")
             ("seed", po::value<unsigned int>(), "seed for random number generator used")
             ("sight-distance", po::value<float>(&params.sight_dist)->default_value(50)->notifier(range(0.f, INFINITY, "sight-distance")), "boid sight distance (pixels) | range [0.0, inf)")
             ("sight-angle", po::value<float>(&params.sight_angle)->default_value(90.f)->notifier(range(0.f, 360.f, "sight-angle")), "boid field of view (degrees) | range [0.0, 360.0]");

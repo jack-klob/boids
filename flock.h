@@ -10,7 +10,7 @@ struct parameters
     float cohesion_factor;
     float alignment_factor;
     float separation_factor;
-    std::size_t n;
+    int n;
     unsigned int seed = 0;
     float sight_dist;
     float sight_angle;
