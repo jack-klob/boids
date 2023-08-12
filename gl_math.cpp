@@ -44,7 +44,11 @@ mat2 rotation_matrix(const float theta)
     return m;
 }
 
-vec2::vec2() : data_() {}
+vec2::vec2() : data_()
+{
+    data_[0] = 0.f;
+    data_[1] = 0.f;
+}
 
 vec2::vec2(const vec2 &other) : data_(other.data_) {}
 
@@ -59,7 +63,7 @@ GLfloat vec2::operator[](int i) const
     return data_[i];
 }
 
-GLfloat& vec2::operator[](int i)
+GLfloat &vec2::operator[](int i)
 {
     return data_[i];
 }
@@ -114,7 +118,7 @@ vec2 vec2::operator/(GLfloat rhs) const
 
 vec2 &vec2::limit(GLfloat lim)
 {
-    if(squared_mag() > lim * lim)
+    if (squared_mag() > lim * lim)
     {
         normalize();
         (*this) *= lim;
@@ -126,9 +130,9 @@ vec2 &vec2::limit(GLfloat lim)
 vec2 &vec2::normalize()
 {
     auto length = mag();
-    if(length)
+    if (length)
         (*this) /= length;
-    
+
     return *this;
 }
 
