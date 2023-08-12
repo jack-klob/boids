@@ -8,11 +8,16 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
+/// @brief class to limit frames
 class FrameLimiter
 {
 public:
+    /// @brief FrameLimiter constructor
+    /// @param fps frames per second limit
     FrameLimiter(unsigned int fps) : fps_(fps) {}
 
+    /// @brief check if the current simulation should be updated
+    /// @return true if the simulation should be updated
     bool should_update()
     {
         auto now = std::chrono::steady_clock::now();
@@ -27,6 +32,8 @@ public:
         return false;
     }
 
+    /// @brief get the time difference from the last updated frame
+    /// @return the time difference
     float frame_dt() const
     {
         // return hard coded frame dt
