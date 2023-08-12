@@ -72,7 +72,8 @@ parameters handle_arguments(int argc, char* argv[])
             ("n", po::value<int>(&params.n)->default_value(50)->notifier(range(1, INFINITY, "n")), "number of boids")
             ("seed", po::value<unsigned int>(), "seed for random number generator used")
             ("sight-distance", po::value<float>(&params.sight_dist)->default_value(50)->notifier(range(0.f, INFINITY, "sight-distance")), "boid sight distance (pixels) | range [0.0, inf)")
-            ("sight-angle", po::value<float>(&params.sight_angle)->default_value(90.f)->notifier(range(0.f, 360.f, "sight-angle")), "boid field of view (degrees) | range [0.0, 360.0]");
+            ("sight-angle", po::value<float>(&params.sight_angle)->default_value(90.f)->notifier(range(0.f, 360.f, "sight-angle")), "boid field of view (degrees) | range [0.0, 360.0]")
+            ("wrap", po::bool_switch(&params.wrap)->default_value(false), "wrap boids if outside screen");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);

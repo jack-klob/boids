@@ -99,7 +99,7 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
         velocities_[i] += (repel.normalize() * 100.f * params_.separation_factor).limit(max_force);
     }
 
-    nudge_inside_margin(i, 7.f, max_force);
+    params_.wrap ? wrap(i) : nudge_inside_margin(i, 7.f, max_force);
 
     auto speed = velocities_[i].mag();
     // enforce minimum speed

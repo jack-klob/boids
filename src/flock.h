@@ -12,6 +12,7 @@ struct parameters
     float alignment_factor;
     float separation_factor;
     int n;
+    bool wrap;
     unsigned int seed = 0;
     float sight_dist;
     float sight_angle;
