@@ -41,6 +41,10 @@ private:
 
 namespace po = boost::program_options;
 
+/// @brief handle command line arguments
+/// @param argc 
+/// @param argv 
+/// @return a parameters struct set with the parameters for the simulation
 parameters handle_arguments(int argc, char* argv[])
 {
     auto range = [](float min, float max, char const *const opt_name)
@@ -56,8 +60,7 @@ parameters handle_arguments(int argc, char* argv[])
     };
 
     parameters params;
-    
-    
+
     po::options_description desc("Allowed options");
     try
     {
@@ -94,7 +97,6 @@ parameters handle_arguments(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-
     parameters params = handle_arguments(argc, argv);
 
     GLFWwindow *window;

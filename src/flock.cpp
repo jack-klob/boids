@@ -2,7 +2,7 @@
 #include <random>
 #include <iostream>
 
-void Flock::create_data()
+void Flock::create_draw_data()
 {
     // create vertex array object to store state
     // this will be the only vertex array object
