@@ -18,15 +18,9 @@ public:
 private:
     void create_data();
 
-    vec2 alignment_contribution(unsigned int i, const std::vector<unsigned int> &neighbors) const;
-
-    vec2 cohesion_contribution(unsigned int i, const std::vector<unsigned int> &neighbors) const;
-
-    vec2 separation_contribution(unsigned int i, const std::vector<unsigned int> &neighbors, GLfloat separation_distance) const;
-
     void wrap(unsigned int i);
     
-    void nudge_inside_margin(unsigned int i, GLfloat nudge_factor);
+    void nudge_inside_margin(unsigned int i, GLfloat nudge_factor, GLfloat max_force);
 
     void apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force);
 
@@ -38,9 +32,8 @@ private:
     unsigned int count_;
     std::vector<vec2> positions_;
     std::vector<vec2> velocities_;
-    std::vector<vec2> accelerations_;
     std::vector<mat2> rotations_;
-    GLuint trans_buffer_, rotation_buffer_;
+    GLuint pos_buffer_, rotation_buffer_;
 };
 
 #endif
