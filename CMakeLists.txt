@@ -21,3 +21,4 @@
  target_link_libraries(flock ${GLFW_LIBRARIES} GLEW::GLEW OpenGL::GL Boost::program_options)
 
  install(TARGETS flock DESTINATION bin)
+ install(PROGRAMS demo DESTINATION bin)
