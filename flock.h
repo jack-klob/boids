@@ -11,14 +11,18 @@ public:
 
     Flock(unsigned int count, unsigned int seed = 0);
 
-    void nudge_inside_margin(unsigned int i, GLfloat nudge_factor);
-
     void update(float dt);
 
     void draw() const;
 
 private:
     void create_data();
+
+    void wrap(unsigned int i);
+    
+    void nudge_inside_margin(unsigned int i, GLfloat nudge_factor);
+
+    void apply_rules_to_boid(unsigned int i);
 
     void update_draw_data() const;
 
@@ -28,6 +32,7 @@ private:
     unsigned int count_;
     std::vector<vec2> positions_;
     std::vector<vec2> velocities_;
+    std::vector<vec2> accelerations_;
     std::vector<mat2> rotations_;
     GLuint trans_buffer_, rotation_buffer_;
 };

@@ -48,6 +48,55 @@ void Flock::create_data()
     glVertexAttribDivisor(3, 1);
 }
 
+void Flock::apply_rules_to_boid(unsigned int i)
+{
+    std::vector<unsigned int> neighbors{};
+    GLfloat sight_distance = 30.f;
+    GLfloat sight_angle = 360.f;
+
+    // find all neighbors of the given boid within the sight distance and angle
+    for (unsigned int j = 0; j < count_; ++j)
+    {
+        if (j == i)
+            continue;
+
+        if (within_sight(i, j, sight_distance, sight_angle))
+        {
+            neighbors.push_back(j);
+        }
+    }
+
+    if (neighbors.size())
+    {
+        // implement alignment
+        vec2 avg_vel{0, 0};
+        vec2 avg_pos{0, 0};
+        vec2 avoidance{0, 0};
+        for (auto n : neighbors)
+        {
+            avg_vel += velocities_[n];
+            avg_pos += positions_[n];
+
+            avoidance += positions_[i] - positions_[n];
+        }
+        avg_vel /= neighbors.size();
+        avg_pos /= neighbors.size();
+
+        GLfloat alignment_factor = 0.005f;
+        GLfloat cohesion_factor = 0.005f;
+        GLfloat avoidance_factor = 0.005f;
+
+        accelerations_[i] += (avg_vel - velocities_[i]) * alignment_factor;
+        accelerations_[i] += (avg_pos - velocities_[i]) * cohesion_factor;
+        accelerations_[i] += avoidance * avoidance_factor;
+    }
+
+    // if the boid is out of the screen, have it want to come to the center
+    // implement a margin from the outside of the screen
+    // boids outside margin are nudged back inside
+    wrap(i);
+}
+
 void Flock::draw() const
 {
     glDrawArraysInstanced(GL_TRIANGLES, 0, 3, count_);
@@ -76,65 +125,32 @@ bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_
 
 void Flock::update(float dt)
 {
+    GLfloat max_speed = 400.f;
+    GLfloat max_force = 50.f;
+
+    // update all forces acting on each boid
     for (unsigned int i = 0; i < count_; ++i)
     {
+        apply_rules_to_boid(i);
+    }
 
-        std::vector<unsigned int> neighbors{};
-        GLfloat sight_distance = 40.f;
-        GLfloat sight_angle = 360.f;
-
-        // find all neighbors of the given boid within the sight distance and angle
-        for (unsigned int j = 0; j < count_; ++j)
-        {   
-            if(j == i)
-                continue;
-
-            if(within_sight(i, j, sight_distance, sight_angle))
-            {
-                neighbors.push_back(j);
-            }
-        }
-
-        if(neighbors.size())
-        {
-            // implement alignment
-            vec2 avg_vel{0,0};
-            vec2 avg_pos{0, 0};
-            vec2 avoidance{0, 0};
-            for(auto n : neighbors)
-            {
-                avg_vel += velocities_[n];
-                avg_pos += positions_[n];
-
-                avoidance += positions_[i] - positions_[n];
-            }
-            avg_vel /= neighbors.size();
-            avg_pos /= neighbors.size();
-
-            GLfloat alignment_factor = 0.005f;
-            GLfloat cohesion_factor = 0.005f;
-            GLfloat avoidance_factor = 0.005f;
-
-            velocities_[i] += (avg_vel - velocities_[i]) * alignment_factor;
-            velocities_[i] += (avg_pos - velocities_[i]) * cohesion_factor;
-            velocities_[i] += avoidance * avoidance_factor;
-        }
-
-        // if the boid is out of the screen, have it want to come to the center
-        // implement a margin from the outside of the screen
-        // boids outside margin are nudged back inside
-        nudge_inside_margin(i, 1);
-
-        // update position of boid with veloctity
-        positions_[i] += velocities_[i] * dt;
-        // update rotation of boid
+    // apply forces to each boid
+    for (unsigned int i = 0; i < count_; ++i)
+    {
+        velocities_[i] += accelerations_[i];
+        velocities_[i].limit(max_speed);
+        
         rotations_[i] = rotation_matrix(std::atan2(velocities_[i][1], velocities_[i][0]));
+
+        positions_[i] += velocities_[i] * dt;
+        accelerations_[i] *= 0.f;
     }
 
     update_draw_data();
 }
 
-Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(count), velocities_(count), rotations_(count)
+Flock::Flock(unsigned int count, unsigned int seed) : 
+    count_(count), positions_(count), velocities_(count), rotations_(count), accelerations_(count)
 {
     // generate random starting positions for agents in flock
     std::random_device rd;
@@ -161,6 +177,21 @@ Flock::Flock(unsigned int count, unsigned int seed) : count_(count), positions_(
     create_data();
 }
 
+void Flock::wrap(unsigned int i)
+{
+    auto &px = positions_[i][0];
+    auto &py = positions_[i][1];
+
+    if(px < 0)
+        px = 800.f;
+    else if(px > 800)
+        px = 0.f;
+    else if(py < 0)
+        py = 800.f;
+    else if(py > 800)
+        py = 0.f;
+}
+
 void Flock::nudge_inside_margin(unsigned int i, GLfloat nudge_factor)
 {
     auto px = positions_[i][0];
@@ -177,5 +208,5 @@ void Flock::nudge_inside_margin(unsigned int i, GLfloat nudge_factor)
     else if(py > 700)
         nudge[1] = -1;
 
-    velocities_[i] += nudge * nudge_factor;
+    accelerations_[i] += nudge * nudge_factor;
 }
