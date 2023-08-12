@@ -6,6 +6,7 @@
  # Find the required libraries (i.e., OpenGL, GLEW, and GLFW).
  find_package(OpenGL REQUIRED)
  find_package(GLEW REQUIRED)
+ find_package(Boost 1.40 COMPONENTS program_options REQUIRED)
  find_package(PkgConfig REQUIRED)
  pkg_search_module(GLFW REQUIRED glfw3)
 
@@ -14,4 +15,4 @@
 
  # Set the includes and libraries for the window target.
  target_include_directories(window PUBLIC ${GLFW_INCLUDE_DIRS})
- target_link_libraries(window ${GLFW_LIBRARIES} GLEW::GLEW OpenGL::GL)
+ target_link_libraries(window ${GLFW_LIBRARIES} GLEW::GLEW OpenGL::GL Boost::program_options)
