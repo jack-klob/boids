@@ -13,7 +13,7 @@ void Flock::create_draw_data()
 
     // defining the shape for a boid
     // facing to the right so rotation angles do not need adjusting
-     GLfloat base_tri[] = 
+    GLfloat base_tri[] = 
     {
         -7.5f,  5.f,
         -7.5f, -5.f,
@@ -189,7 +189,7 @@ Flock::Flock(const parameters &params) :
         velocities_[i][1] = 400.f * (2.f * (rng(generator) - 0.5f));
     }
 
-    create_data();
+    create_draw_data();
 }
 
 void Flock::wrap(unsigned int i)
