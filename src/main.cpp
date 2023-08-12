@@ -131,6 +131,8 @@ int main(int argc, char* argv[])
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
+    // required for lab computers
+    glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK)
     {
         return -1;
