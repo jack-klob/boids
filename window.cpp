@@ -41,19 +41,6 @@ private:
 
 namespace po = boost::program_options;
 
-struct parameters
-{
-    float cohesion_factor;
-    float alignment_factor;
-    float separation_factor;
-    std::size_t n;
-    unsigned int seed;
-    float sight_dist;
-    float sight_angle;
-    int height;
-    int width;
-};
-
 parameters handle_arguments(int argc, char* argv[])
 {
     auto range = [](float min, float max, char const *const opt_name)
@@ -122,7 +109,7 @@ int main(int argc, char* argv[])
 
     // create window
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    window = glfwCreateWindow(800, 800, "Flocking Simulation", NULL, NULL);
+    window = glfwCreateWindow(params.width, params.height, "Flocking Simulation", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -143,12 +130,12 @@ int main(int argc, char* argv[])
     glUseProgram(shader);
 
     // project to pixel space
-    auto proj = make_ortho(0.f, 800.f, 0.f, 800.f);
+    auto proj = make_ortho(0.f, params.width, 0.f, params.height);
     GLuint proj_loc = glGetUniformLocation(shader, "u_proj");
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj[0][0]);
 
     FrameLimiter limiter(60);
-    Flock flock(200);
+    Flock flock(params);
 
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))

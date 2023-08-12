@@ -56,8 +56,6 @@ void Flock::create_data()
 void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force)
 {
     std::vector<unsigned int> neighbors{};
-    GLfloat sight_distance = 60.f;
-    GLfloat sight_angle = 45.f;
     GLfloat separation_distance = 25.f;
 
     vec2 avg_pos, avg_heading, repel;
@@ -67,7 +65,7 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
         if (j == i)
             continue;
 
-        if (within_sight(i, j, sight_distance, sight_angle))
+        if (within_sight(i, j, params_.sight_dist, params_.sight_angle))
         {
             neighbors.push_back(j);
         }
@@ -88,22 +86,17 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
         avg_heading += velocities_[n];
     }
 
-    GLfloat alignment_factor = 100.f;
-    GLfloat cohesion_factor = 100.f;
-    GLfloat separation_factor = 100.f;
-
-
     if(neighbors.size())
     {
         avg_pos /= neighbors.size();
         avg_heading /= neighbors.size();
 
         // apply cohesion
-        velocities_[i] += ((avg_pos - positions_[i]).normalize() * cohesion_factor).limit(max_force);
+        velocities_[i] += ((avg_pos - positions_[i]).normalize() * 100.f * params_.cohesion_factor).limit(max_force);
         // apply alignment
-        velocities_[i] += ((avg_heading - velocities_[i]).normalize() * alignment_factor).limit(max_force);
+        velocities_[i] += ((avg_heading - velocities_[i]).normalize() * 100.f * params_.alignment_factor).limit(max_force);
         // apply separation
-        velocities_[i] += (repel.normalize() * separation_factor).limit(max_force);
+        velocities_[i] += (repel.normalize() * 100.f * params_.separation_factor).limit(max_force);
     }
 
     nudge_inside_margin(i, 7.f, max_force);
@@ -172,14 +165,14 @@ void Flock::update(float dt)
     update_draw_data();
 }
 
-Flock::Flock(unsigned int count, unsigned int seed) : 
-    count_(count), positions_(count), velocities_(count), rotations_(count)
+Flock::Flock(const parameters &params) : 
+    params_(params),count_(params.n), positions_(params.n), velocities_(params.n), rotations_(params.n)
 {
     // generate random starting positions for agents in flock
     std::random_device rd;
     std::mt19937 generator(rd());
-    if (seed)
-        generator.seed(seed);
+    if (params_.seed)
+        generator.seed(params_.seed);
     
     std::uniform_real_distribution<float> rng(0.f, 1.f);
 
@@ -187,8 +180,8 @@ Flock::Flock(unsigned int count, unsigned int seed) :
     for (unsigned int i = 0; i < count_; ++i)
     {
         // random starting position within window
-        positions_[i][0] = 800.f * rng(generator);
-        positions_[i][1] = 800.f * rng(generator);
+        positions_[i][0] = params_.width * rng(generator);
+        positions_[i][1] = params_.height * rng(generator);
 
         // random starting value for velocity
         // velocity in pixels/sec

@@ -31,21 +31,17 @@ class vec2
         /// @brief vec2 storage
         using vec2_data = std::array<GLfloat, 2>;
 
-
         /// @brief default constructor
         vec2();
-
 
         /// @brief value constructor
         /// @param x value for x
         /// @param y value for y
         vec2(GLfloat x, GLfloat y);
 
-
         /// @brief copy constructor
         /// @param other vec2 to copy
         vec2(const vec2 &other);
-
 
         GLfloat operator[](int i) const;
         GLfloat& operator[](int i);
@@ -59,7 +55,6 @@ class vec2
         vec2 operator-(const vec2 rhs) const;
         vec2 operator*(GLfloat rhs) const;
         vec2 operator/(GLfloat rhs) const;
-
 
         /// @brief clamps the magnitude of the vector
         /// @param lim value to clamp to

@@ -5,11 +5,24 @@
 #include <vector>
 #include <GL/glew.h>
 
+struct parameters
+{
+    float cohesion_factor;
+    float alignment_factor;
+    float separation_factor;
+    std::size_t n;
+    unsigned int seed = 0;
+    float sight_dist;
+    float sight_angle;
+    int height = 800;
+    int width = 800;
+};
+
 class Flock
 {
 public:
 
-    Flock(unsigned int count, unsigned int seed = 0);
+    Flock(const parameters& params);
 
     void update(float dt);
 
@@ -29,6 +42,7 @@ private:
     bool within_sight(unsigned int source, unsigned int other, GLfloat sight_distance, GLfloat sight_angle) const;
 
 private:
+    const parameters params_;
     unsigned int count_;
     std::vector<vec2> positions_;
     std::vector<vec2> velocities_;
