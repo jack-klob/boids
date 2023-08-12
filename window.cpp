@@ -32,8 +32,6 @@ public:
         return dt_.count();
     }
 
-    
-
 private:
     unsigned int fps_;
     std::chrono::duration<float> dt_;
@@ -69,14 +67,6 @@ int main(void)
         return -1;
     }
 
-    std::cout << glGetString(GL_VERSION) << std::endl;
-
-    // this currently must be done outside of boids class
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-
     // create and use shaders
     GLuint shader = loadShaders("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     glUseProgram(shader);
@@ -88,7 +78,6 @@ int main(void)
 
     FrameLimiter limiter(60);
     Flock flock(200);
-
 
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
