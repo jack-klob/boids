@@ -111,13 +111,15 @@ vec2 vec2::operator/(GLfloat rhs) const
     return vec2(*this) /= rhs;
 }
 
-void vec2::limit(GLfloat lim)
+vec2 &vec2::limit(GLfloat lim)
 {
     if(squared_mag() > lim * lim)
     {
         normalize();
-        *this *= lim;
+        (*this) *= lim;
     }
+
+    return *this;
 }
 
 vec2 &vec2::normalize()

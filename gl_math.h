@@ -33,7 +33,7 @@ class vec2
         vec2 operator*(GLfloat rhs) const;
         vec2 operator/(GLfloat rhs) const;
 
-        void limit(GLfloat lim);
+        vec2 &limit(GLfloat lim);
         vec2 &normalize();
 
         GLfloat squared_mag() const;

@@ -22,7 +22,7 @@ private:
     
     void nudge_inside_margin(unsigned int i, GLfloat nudge_factor);
 
-    void apply_rules_to_boid(unsigned int i);
+    void apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force);
 
     void update_draw_data() const;
 

@@ -48,11 +48,12 @@ void Flock::create_data()
     glVertexAttribDivisor(3, 1);
 }
 
-void Flock::apply_rules_to_boid(unsigned int i)
+void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force)
 {
     std::vector<unsigned int> neighbors{};
-    GLfloat sight_distance = 30.f;
+    GLfloat sight_distance = 60.f;
     GLfloat sight_angle = 360.f;
+    GLfloat separation_distance = 20.f;
 
     // find all neighbors of the given boid within the sight distance and angle
     for (unsigned int j = 0; j < count_; ++j)
@@ -69,25 +70,59 @@ void Flock::apply_rules_to_boid(unsigned int i)
     if (neighbors.size())
     {
         // implement alignment
-        vec2 avg_vel{0, 0};
+        vec2 avg_heading{0, 0};
         vec2 avg_pos{0, 0};
         vec2 avoidance{0, 0};
+        unsigned int avoid_count = 0;
         for (auto n : neighbors)
         {
-            avg_vel += velocities_[n];
+            avg_heading += velocities_[n];
             avg_pos += positions_[n];
 
-            avoidance += positions_[i] - positions_[n];
+            vec2 distance_vec = positions_[i] - positions_[n];
+            if (distance_vec.squared_mag() < separation_distance * separation_distance)
+            {
+                auto distance = distance_vec.mag();
+                distance_vec.normalize();
+                avoidance += distance_vec / distance;
+                ++avoid_count;
+            }
         }
-        avg_vel /= neighbors.size();
+
+        if (avoid_count)
+        {
+            // these 3 lines may be equivalent to limiting by max speed
+            avoidance /= avoid_count;
+            avoidance.normalize();
+            avoidance *= max_speed;
+            avoidance -= velocities_[i];
+            avoidance.limit(max_force);
+        }
+
+        avg_heading /= neighbors.size();
         avg_pos /= neighbors.size();
 
-        GLfloat alignment_factor = 0.005f;
-        GLfloat cohesion_factor = 0.005f;
-        GLfloat avoidance_factor = 0.005f;
+        GLfloat alignment_factor = 0.5f;
+        GLfloat cohesion_factor = 0.5f;
+        GLfloat avoidance_factor = 0.5f;
 
-        accelerations_[i] += (avg_vel - velocities_[i]) * alignment_factor;
-        accelerations_[i] += (avg_pos - velocities_[i]) * cohesion_factor;
+        vec2 steer_alignment = avg_heading;
+        steer_alignment.normalize();
+        // this could maybe also be the mag of the current velocity
+        // (boids just want to change heading but maintain speed)
+        steer_alignment *= max_speed;
+        steer_alignment -= velocities_[i];
+        steer_alignment.limit(max_force);
+
+        vec2 steer_cohesion = avg_pos;
+        steer_cohesion -= positions_[i];
+        steer_cohesion.normalize();
+        steer_cohesion *= max_speed;
+        steer_cohesion -= velocities_[i];
+        steer_cohesion.limit(max_force);
+
+        accelerations_[i] += steer_alignment * alignment_factor;
+        accelerations_[i] += steer_cohesion * cohesion_factor;
         accelerations_[i] += avoidance * avoidance_factor;
     }
 
@@ -112,7 +147,7 @@ void Flock::update_draw_data() const
 bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_distance, GLfloat sight_angle) const
 {
     auto diff = positions_[source] - positions_[other];
-    if(abs(diff[0]) < sight_distance && abs(diff[1]) < sight_distance)
+    if(std::abs(diff[0]) < sight_distance && std::abs(diff[1]) < sight_distance)
     {
         if (diff.squared_mag() < sight_distance * sight_distance)
         {
@@ -126,12 +161,12 @@ bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_
 void Flock::update(float dt)
 {
     GLfloat max_speed = 400.f;
-    GLfloat max_force = 50.f;
+    GLfloat max_force = 20.f;
 
     // update all forces acting on each boid
     for (unsigned int i = 0; i < count_; ++i)
     {
-        apply_rules_to_boid(i);
+        apply_rules_to_boid(i, max_speed, max_force);
     }
 
     // apply forces to each boid
