@@ -16,6 +16,7 @@ struct parameters
     unsigned int seed = 0;
     float sight_dist;
     float sight_angle;
+    float separation_dist;
     int height = 800;
     int width = 800;
 };
@@ -48,23 +49,17 @@ private:
     
     /// @brief apply a force to nudge boid back inside screen
     /// @param i index of boid to nudge
-    /// @param nudge_factor influence of the nudge on the velocity of the boid
-    /// @param max_force the max force which can be applied to a boid
-    void nudge_inside_margin(unsigned int i, GLfloat nudge_factor, GLfloat max_force);
+    void nudge_inside_margin(unsigned int i);
 
     /// @brief update velocity of boid based on flocking rules
     /// @param i index of boid to apply rules to
-    /// @param max_speed the max speed of a boid
-    /// @param max_force the max force which can be applied to a boid
-    void apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force);
+    void apply_rules_to_boid(unsigned int i);
     
     /// @brief check if another boid can be seen by the current boid
     /// @param source boid which is looking
     /// @param other boid which is tested
-    /// @param sight_distance sensing distance of the current boid
-    /// @param sight_angle field of view of the current boid
     /// @return true if other boid can be seen
-    bool within_sight(unsigned int source, unsigned int other, GLfloat sight_distance, GLfloat sight_angle) const;
+    bool within_sight(unsigned int source, unsigned int other) const;
 
 private:
     const parameters params_;

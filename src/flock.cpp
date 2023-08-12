@@ -2,6 +2,13 @@
 #include <random>
 #include <iostream>
 
+// constant simluation parameters
+constexpr GLfloat MAX_FORCE = 20.f;            // the max force which can be applied to a boid
+constexpr GLfloat MAX_SPEED = 400.f;           // the max speed of a boid
+constexpr GLfloat MIN_SPEED = 200.f;           // the min speed of a boid
+constexpr GLfloat SCREEN_MARGIN = 250.f;       // if not wrapping, the distance to the edge of a screen before boid is nudge away
+constexpr GLfloat SCREEN_NUDGE_WEIGHT = 7.f;   // weight to nudge a boid away from edge of screen
+
 void Flock::create_draw_data()
 {
     // create vertex array object to store state
@@ -53,10 +60,9 @@ void Flock::create_draw_data()
 
 // long function but more performant than separate functions for each rule
 // where 3 separate loops would be required
-void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force)
+void Flock::apply_rules_to_boid(unsigned int i)
 {
     std::vector<unsigned int> neighbors{};
-    GLfloat separation_distance = 25.f;
 
     vec2 avg_pos, avg_heading, repel;
 
@@ -65,7 +71,7 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
         if (j == i)
             continue;
 
-        if (within_sight(i, j, params_.sight_dist, params_.sight_angle))
+        if (within_sight(i, j))
         {
             neighbors.push_back(j);
         }
@@ -75,7 +81,7 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
     {
         vec2 dist_vec = positions_[i] - positions_[n];
         auto dist = dist_vec.mag();
-        if (dist <= separation_distance * separation_distance)
+        if (dist <= params_.separation_dist * params_.separation_dist)
         {   
             // the repelling force is inversely proportional to the distance
             // closer boids should repel more than ones further away
@@ -92,27 +98,27 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
         avg_heading /= neighbors.size();
 
         // apply cohesion
-        velocities_[i] += ((avg_pos - positions_[i]).normalize() * 100.f * params_.cohesion_factor).limit(max_force);
+        velocities_[i] += ((avg_pos - positions_[i]).normalize() * 100.f * params_.cohesion_factor).limit(MAX_FORCE);
         // apply alignment
-        velocities_[i] += ((avg_heading - velocities_[i]).normalize() * 100.f * params_.alignment_factor).limit(max_force);
+        velocities_[i] += ((avg_heading - velocities_[i]).normalize() * 100.f * params_.alignment_factor).limit(MAX_FORCE);
         // apply separation
-        velocities_[i] += (repel.normalize() * 100.f * params_.separation_factor).limit(max_force);
+        velocities_[i] += (repel.normalize() * 100.f * params_.separation_factor).limit(MAX_FORCE);
     }
 
-    params_.wrap ? wrap(i) : nudge_inside_margin(i, 7.f, max_force);
+    params_.wrap ? wrap(i) : nudge_inside_margin(i);
 
     auto speed = velocities_[i].mag();
     // enforce minimum speed
-    if(speed < 200.f)
+    if(speed < MIN_SPEED)
     {
         velocities_[i].normalize();
-        velocities_[i] *= 200.f;
+        velocities_[i] *= MIN_SPEED;
     }
     // enforce maximum speed
-    if(speed > 600.f)
+    if(speed > MAX_SPEED)
     {
         velocities_[i].normalize();
-        velocities_[i] *= 600.f;
+        velocities_[i] *= MAX_SPEED;
     }
 }
 
@@ -129,12 +135,15 @@ void Flock::update_draw_data() const
     glNamedBufferSubData(rotation_buffer_, 0, count_ * sizeof(mat2), rotations_.data());
 }
 
-bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_distance, GLfloat sight_angle) const
+bool Flock::within_sight(unsigned int source, unsigned int other) const
 {
     auto diff = positions_[source] - positions_[other];
-    if(std::abs(diff[0]) <= sight_distance && std::abs(diff[1]) <= sight_distance && positions_[source].angle_between(diff) <= sight_angle)
+    if(
+        std::abs(diff[0]) <= params_.sight_dist && 
+        std::abs(diff[1]) <= params_.sight_dist && 
+        positions_[source].angle_between(diff) <= params_.sight_angle)
     {
-        if (diff.squared_mag() <= sight_distance * sight_distance)
+        if (diff.squared_mag() <= params_.sight_dist * params_.sight_dist)
         {
             return true;
         }
@@ -145,20 +154,17 @@ bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_
 
 void Flock::update(float dt)
 {
-    GLfloat max_speed = 400.f;
-    GLfloat max_force = 15.f;
-
     // update all forces acting on each boid
     for (unsigned int i = 0; i < count_; ++i)
     {
-        apply_rules_to_boid(i, max_speed, max_force);
+        apply_rules_to_boid(i);
     }
 
     // apply forces to each boid
     for (unsigned int i = 0; i < count_; ++i)
     {
         rotations_[i] = rotation_matrix(std::atan2(velocities_[i][1], velocities_[i][0]));
-        velocities_[i].limit(max_speed);
+        velocities_[i].limit(MAX_SPEED);
         positions_[i] += velocities_[i] * dt;
     }
 
@@ -185,8 +191,8 @@ Flock::Flock(const parameters &params) :
 
         // random starting value for velocity
         // velocity in pixels/sec
-        velocities_[i][0] = 400.f * (2.f * (rng(generator) - 0.5f));
-        velocities_[i][1] = 400.f * (2.f * (rng(generator) - 0.5f));
+        velocities_[i][0] = MAX_SPEED * (2.f * (rng(generator) - 0.5f));
+        velocities_[i][1] = MAX_SPEED * (2.f * (rng(generator) - 0.5f));
     }
 
     create_draw_data();
@@ -207,22 +213,21 @@ void Flock::wrap(unsigned int i)
         py = 0.f;
 }
 
-void Flock::nudge_inside_margin(unsigned int i, GLfloat nudge_factor, GLfloat max_force)
+void Flock::nudge_inside_margin(unsigned int i)
 {
     auto px = positions_[i][0];
     auto py = positions_[i][1];
-    GLfloat margin = 250;
 
     vec2 nudge{0, 0};
-    if(px < margin)
+    if(px < SCREEN_MARGIN)
         nudge[0] = 1;
-    else if(px > params_.width - margin)
+    else if(px > params_.width - SCREEN_MARGIN)
         nudge[0] = -1;
 
-    if(py < margin)
+    if(py < SCREEN_MARGIN)
         nudge[1] = 1;
-    else if(py > params_.height - margin)
+    else if(py > params_.height - SCREEN_MARGIN)
         nudge[1] = -1;
 
-    velocities_[i] += (nudge.normalize() * nudge_factor).limit(max_force);
+    velocities_[i] += (nudge.normalize() * SCREEN_NUDGE_WEIGHT).limit(MAX_FORCE);
 }
