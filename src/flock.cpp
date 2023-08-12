@@ -131,9 +131,12 @@ void Flock::draw() const
 void Flock::update_draw_data() const
 {
     // update position buffer with positions
-    glNamedBufferSubData(pos_buffer_, 0, count_ * sizeof(vec2), positions_.data());
+    glBindBuffer(GL_ARRAY_BUFFER, pos_buffer_);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, count_ * sizeof(vec2), positions_.data());
+
     // update rotation buffer with rotations
-    glNamedBufferSubData(rotation_buffer_, 0, count_ * sizeof(mat2), rotations_.data());
+    glBindBuffer(GL_ARRAY_BUFFER, rotation_buffer_);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, count_ * sizeof(mat2), rotations_.data());
 }
 
 bool Flock::within_sight(unsigned int source, unsigned int other) const
