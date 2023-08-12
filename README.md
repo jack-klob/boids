@@ -6,10 +6,10 @@ Let $INSTALL_DIR denote the directory into
 which the software is to be installed.
 The following are the commands to compile and install the application. They must be executed within the top level project directory
 ```
-cmake -H. - Btmp_cmake - DCMAKE_INSTALL_PREFIX =$INSTALL_DIR
+cmake -H. -Btmp_cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR
 ```
 ```
-cmake -- build tmp_cmake --clean - first -- target install
+cmake --build tmp_cmake --clean-first --target install
 ```
 
 ## Running application
