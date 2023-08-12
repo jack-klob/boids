@@ -1,5 +1,5 @@
  cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
- project(flock LANGUAGES CXX)
+ project(flocking_sim LANGUAGES CXX)
  set(CMAKE_CXX_STANDARD 20)
  set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
@@ -14,11 +14,11 @@
  pkg_search_module(GLFW REQUIRED glfw3)
 
  # Define a program target.
- add_executable(flock src/main.cpp src/shader.cpp src/flock.cpp src/gl_math.cpp)
+ add_executable(flocking_sim src/main.cpp src/shader.cpp src/flock.cpp src/gl_math.cpp)
 
  # Set the includes and libraries for the executable.
- target_include_directories(flock PUBLIC ${GLFW_INCLUDE_DIRS})
- target_link_libraries(flock ${GLFW_LIBRARIES} GLEW::GLEW OpenGL::GL Boost::program_options)
+ target_include_directories(flocking_sim PUBLIC ${GLFW_INCLUDE_DIRS})
+ target_link_libraries(flocking_sim ${GLFW_LIBRARIES} GLEW::GLEW OpenGL::GL Boost::program_options)
 
- install(TARGETS flock DESTINATION bin)
+ install(TARGETS flocking_sim DESTINATION bin)
  install(PROGRAMS demo DESTINATION bin)

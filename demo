@@ -9,7 +9,7 @@ panic()
 # Get the directory in which the currently running script is located.
 cmd_dir=$(dirname "$0") || panic "cannot determine command directory"
 
-flock_program="$cmd_dir/flock"
+flock_program="$cmd_dir/flocking_sim"
 
 echo "Running demo simulation with all default parameters"
 $flock_program || panic "demo failed"
