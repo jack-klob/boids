@@ -52,8 +52,8 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
 {
     std::vector<unsigned int> neighbors{};
     GLfloat sight_distance = 60.f;
-    GLfloat sight_angle = 360.f;
-    GLfloat separation_distance = 20.f;
+    GLfloat sight_angle = 45.f;
+    GLfloat separation_distance = 60.f;
 
     // find all neighbors of the given boid within the sight distance and angle
     for (unsigned int j = 0; j < count_; ++j)
@@ -102,14 +102,12 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
         avg_heading /= neighbors.size();
         avg_pos /= neighbors.size();
 
-        GLfloat alignment_factor = 0.5f;
-        GLfloat cohesion_factor = 0.5f;
-        GLfloat avoidance_factor = 0.5f;
+        GLfloat alignment_factor = 0.8f;
+        GLfloat cohesion_factor = 0.8f;
+        GLfloat avoidance_factor = 0.8f;
 
         vec2 steer_alignment = avg_heading;
         steer_alignment.normalize();
-        // this could maybe also be the mag of the current velocity
-        // (boids just want to change heading but maintain speed)
         steer_alignment *= max_speed;
         steer_alignment -= velocities_[i];
         steer_alignment.limit(max_force);
@@ -129,7 +127,8 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
     // if the boid is out of the screen, have it want to come to the center
     // implement a margin from the outside of the screen
     // boids outside margin are nudged back inside
-    wrap(i);
+    nudge_inside_margin(i, 6.f);
+    //wrap(i);
 }
 
 void Flock::draw() const
@@ -147,9 +146,9 @@ void Flock::update_draw_data() const
 bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_distance, GLfloat sight_angle) const
 {
     auto diff = positions_[source] - positions_[other];
-    if(std::abs(diff[0]) < sight_distance && std::abs(diff[1]) < sight_distance)
+    if(std::abs(diff[0]) <= sight_distance && std::abs(diff[1]) <= sight_distance && positions_[source].angle_between(diff) <= sight_angle)
     {
-        if (diff.squared_mag() < sight_distance * sight_distance)
+        if (diff.squared_mag() <= sight_distance * sight_distance)
         {
             return true;
         }
@@ -161,7 +160,7 @@ bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_
 void Flock::update(float dt)
 {
     GLfloat max_speed = 400.f;
-    GLfloat max_force = 20.f;
+    GLfloat max_force = 10.f;
 
     // update all forces acting on each boid
     for (unsigned int i = 0; i < count_; ++i)
@@ -233,14 +232,14 @@ void Flock::nudge_inside_margin(unsigned int i, GLfloat nudge_factor)
     auto py = positions_[i][1];
 
     vec2 nudge{0, 0};
-    if(px < 100)
+    if(px < 150)
         nudge[0] = 1;
-    else if(px > 700)
+    else if(px > 650)
         nudge[0] = -1;
 
-    if(py < 100)
+    if(py < 150)
         nudge[1] = 1;
-    else if(py > 700)
+    else if(py > 650)
         nudge[1] = -1;
 
     accelerations_[i] += nudge * nudge_factor;

@@ -87,7 +87,7 @@ int main(void)
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, &proj[0][0]);
 
     FrameLimiter limiter(60);
-    Flock flock(200);
+    Flock flock(250);
 
 
     // Loop until the user closes the window

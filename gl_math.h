@@ -36,6 +36,9 @@ class vec2
         vec2 &limit(GLfloat lim);
         vec2 &normalize();
 
+        GLfloat dot(const vec2 &other) const;
+        GLfloat angle_between(const vec2 &other) const;
+
         GLfloat squared_mag() const;
         GLfloat mag() const;
 

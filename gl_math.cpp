@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include "gl_math.h"
 #include <cmath>
 
@@ -126,6 +127,18 @@ vec2 &vec2::normalize()
 {
     (*this) /= mag();
     return *this;
+}
+
+GLfloat vec2::dot(const vec2 &other) const
+{
+    return data_[0] * other.data_[0] + data_[1] * other.data_[1];
+}
+
+GLfloat vec2::angle_between(const vec2 &other) const
+{
+    GLfloat angle = std::acos(dot(other) / mag() / other.mag());
+    // convert to degrees
+    return angle * 180.f / M_PI;
 }
 
 GLfloat vec2::squared_mag() const
