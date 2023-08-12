@@ -1,5 +1,6 @@
 #include "flock.h"
 #include <random>
+#include <iostream>
 
 // create buffer for drawing the boids
 void Flock::create_data()
@@ -48,12 +49,195 @@ void Flock::create_data()
     glVertexAttribDivisor(3, 1);
 }
 
+vec2 Flock::alignment_contribution(unsigned int i, const std::vector<unsigned int>& neighbors) const
+{
+    vec2 total_heading{0, 0};
+    if(!neighbors.size())
+        return total_heading;
+
+    for (auto n : neighbors)
+    {
+        total_heading += velocities_[n];
+    }
+
+    // vec2 steer_alignment = avg_heading;
+    // steer_alignment.normalize();
+    // steer_alignment *= max_speed;
+    // steer_alignment -= velocities_[i];
+    // steer_alignment.limit(max_force);
+
+    auto avg_heading = total_heading / neighbors.size();
+    //auto nudge = avg_heading - velocities_[i];
+    //return nudge.normalize();
+    return avg_heading;
+}
+
+vec2 Flock::cohesion_contribution(unsigned int i, const std::vector<unsigned int> &neighbors) const
+{
+    vec2 total_position{0, 0};
+    if (!neighbors.size())
+        return total_position;
+
+    for (auto n : neighbors)
+    {
+        total_position += velocities_[n];
+    }
+
+    auto avg_position = total_position / neighbors.size();
+    auto nudge = avg_position - positions_[i];
+    nudge.normalize();
+    //auto nudge = avg_position - positions_[i];
+    //nudge -= velocities_[i];
+    //return nudge.normalize();
+    return nudge;
+}
+
+vec2 Flock::separation_contribution(unsigned int i, const std::vector<unsigned int>& neighbors, GLfloat separation_distance) const
+{
+    vec2 avoidance{0, 0};
+    unsigned int avoid_count = 0;
+    for(auto n : neighbors)
+    {
+        vec2 distance_vec = positions_[i] - positions_[n];
+        if (distance_vec.squared_mag() < separation_distance * separation_distance)
+        {
+            auto distance = distance_vec.mag();
+            distance_vec.normalize();
+            avoidance += distance_vec / distance;
+            ++avoid_count;
+        }
+    }
+
+    if (avoid_count)
+    {
+        avoidance /= avoid_count;
+    }
+
+    return avoidance;
+}
+
+// void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force)
+// {
+//     std::vector<unsigned int> neighbors{};
+//     GLfloat sight_distance = 60.f;
+//     GLfloat sight_angle = 45.f;
+//     GLfloat separation_distance = 60.f;
+
+//     // find all neighbors of the given boid within the sight distance and angle
+//     for (unsigned int j = 0; j < count_; ++j)
+//     {
+//         if (j == i)
+//             continue;
+
+//         if (within_sight(i, j, sight_distance, sight_angle))
+//         {
+//             neighbors.push_back(j);
+//         }
+//     }
+
+//     if (neighbors.size())
+//     {
+//         // implement alignment
+//         vec2 avg_heading{0, 0};
+//         vec2 avg_pos{0, 0};
+//         vec2 avoidance{0, 0};
+//         unsigned int avoid_count = 0;
+//         for (auto n : neighbors)
+//         {
+//             avg_heading += velocities_[n];
+//             avg_pos += positions_[n];
+
+//             vec2 distance_vec = positions_[i] - positions_[n];
+//             if (distance_vec.squared_mag() < separation_distance * separation_distance)
+//             {
+//                 auto distance = distance_vec.mag();
+//                 distance_vec.normalize();
+//                 avoidance += distance_vec / distance;
+//                 ++avoid_count;
+//             }
+//         }
+
+        
+
+//         avg_heading /= neighbors.size();
+//         avg_pos /= neighbors.size();
+
+//         GLfloat alignment_factor = 0.8f;
+//         GLfloat cohesion_factor = 0.8f;
+//         GLfloat avoidance_factor = 0.8f;
+
+//         vec2 steer_alignment = avg_heading;
+//         steer_alignment.normalize();
+//         steer_alignment *= max_speed;
+//         steer_alignment -= velocities_[i];
+//         steer_alignment.limit(max_force);
+
+//         vec2 steer_cohesion = avg_pos;
+//         steer_cohesion -= positions_[i];
+//         steer_cohesion.normalize();
+//         steer_cohesion *= max_speed;
+//         steer_cohesion -= velocities_[i];
+//         steer_cohesion.limit(max_force);
+
+//         accelerations_[i] += steer_alignment * alignment_factor;
+//         accelerations_[i] += steer_cohesion * cohesion_factor;
+//         accelerations_[i] += avoidance * avoidance_factor;
+//     }
+
+//     // if the boid is out of the screen, have it want to come to the center
+//     // implement a margin from the outside of the screen
+//     // boids outside margin are nudged back inside
+//     nudge_inside_margin(i, 6.f);
+//     //wrap(i);
+// }
+
+// void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force)
+// {
+//     std::vector<unsigned int> neighbors{};
+//     GLfloat sight_distance = 60.f;
+//     GLfloat sight_angle = 45.f;
+//     GLfloat separation_distance = 60.f;
+
+//     // find all neighbors of the given boid within the sight distance and angle
+//     for (unsigned int j = 0; j < count_; ++j)
+//     {
+//         if (j == i)
+//             continue;
+
+//         if (within_sight(i, j, sight_distance, sight_angle))
+//         {
+//             neighbors.push_back(j);
+//         }
+//     }
+    
+//     GLfloat alignment_factor = .5f;
+//     GLfloat cohesion_factor = .5f;
+//     GLfloat avoidance_factor = 50.f;
+
+//     vec2 alignment = alignment_contribution(i, neighbors) * alignment_factor;
+//     vec2 cohesion = cohesion_contribution(i, neighbors) * cohesion_factor;
+//     vec2 separation = separation_contribution(i, neighbors, separation_distance) * avoidance_factor;
+
+//     nudge_inside_margin(i, 50.f);
+
+//     velocities_[i] += alignment * alignment_factor;
+//     velocities_[i] += cohesion * cohesion_factor;
+//     velocities_[i] += separation * avoidance_factor;
+//     velocities_[i].limit(max_speed);
+
+//     //wrap(i);
+// }
+
 void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_force)
 {
     std::vector<unsigned int> neighbors{};
     GLfloat sight_distance = 60.f;
     GLfloat sight_angle = 45.f;
-    GLfloat separation_distance = 60.f;
+    GLfloat separation_distance = 25.f;
+
+    vec2 avg_pos{0, 0};
+    vec2 avg_heading{0, 0};
+    vec2 close{0, 0};
 
     // find all neighbors of the given boid within the sight distance and angle
     for (unsigned int j = 0; j < count_; ++j)
@@ -67,68 +251,45 @@ void Flock::apply_rules_to_boid(unsigned int i, GLfloat max_speed, GLfloat max_f
         }
     }
 
-    if (neighbors.size())
+    for(auto n : neighbors)
     {
-        // implement alignment
-        vec2 avg_heading{0, 0};
-        vec2 avg_pos{0, 0};
-        vec2 avoidance{0, 0};
-        unsigned int avoid_count = 0;
-        for (auto n : neighbors)
+        auto dist = positions_[i] - positions_[n];
+        if (dist.squared_mag() <= separation_distance * separation_distance)
         {
-            avg_heading += velocities_[n];
-            avg_pos += positions_[n];
-
-            vec2 distance_vec = positions_[i] - positions_[n];
-            if (distance_vec.squared_mag() < separation_distance * separation_distance)
-            {
-                auto distance = distance_vec.mag();
-                distance_vec.normalize();
-                avoidance += distance_vec / distance;
-                ++avoid_count;
-            }
+            close += dist;
         }
 
-        if (avoid_count)
-        {
-            // these 3 lines may be equivalent to limiting by max speed
-            avoidance /= avoid_count;
-            avoidance.normalize();
-            avoidance *= max_speed;
-            avoidance -= velocities_[i];
-            avoidance.limit(max_force);
-        }
-
-        avg_heading /= neighbors.size();
-        avg_pos /= neighbors.size();
-
-        GLfloat alignment_factor = 0.8f;
-        GLfloat cohesion_factor = 0.8f;
-        GLfloat avoidance_factor = 0.8f;
-
-        vec2 steer_alignment = avg_heading;
-        steer_alignment.normalize();
-        steer_alignment *= max_speed;
-        steer_alignment -= velocities_[i];
-        steer_alignment.limit(max_force);
-
-        vec2 steer_cohesion = avg_pos;
-        steer_cohesion -= positions_[i];
-        steer_cohesion.normalize();
-        steer_cohesion *= max_speed;
-        steer_cohesion -= velocities_[i];
-        steer_cohesion.limit(max_force);
-
-        accelerations_[i] += steer_alignment * alignment_factor;
-        accelerations_[i] += steer_cohesion * cohesion_factor;
-        accelerations_[i] += avoidance * avoidance_factor;
+        avg_pos += positions_[n];
+        avg_heading += velocities_[n];
     }
 
-    // if the boid is out of the screen, have it want to come to the center
-    // implement a margin from the outside of the screen
-    // boids outside margin are nudged back inside
-    nudge_inside_margin(i, 6.f);
+    GLfloat alignment_factor = 100.f;
+    GLfloat cohesion_factor = 100.f;
+    GLfloat avoidance_factor = 100000.f;
+    if(neighbors.size())
+    {
+        avg_pos /= neighbors.size();
+        avg_heading /= neighbors.size();
+
+        velocities_[i] += ((avg_pos - positions_[i]).normalize() * cohesion_factor).limit(max_force);
+        velocities_[i] += ((avg_heading - velocities_[i]).normalize() * alignment_factor).limit(max_force);
+        velocities_[i] += (close.normalize() * avoidance_factor).limit(max_force);
+    }
+
+    nudge_inside_margin(i, 7.f);
     //wrap(i);
+
+    auto speed = velocities_[i].mag();
+    if(speed < 200.f)
+    {
+        velocities_[i].normalize();
+        velocities_[i] *= 200.f;
+    }
+    if(speed > 600.f)
+    {
+        velocities_[i].normalize();
+        velocities_[i] *= 600.f;
+    }
 }
 
 void Flock::draw() const
@@ -159,7 +320,7 @@ bool Flock::within_sight(unsigned int source, unsigned int other, GLfloat sight_
 
 void Flock::update(float dt)
 {
-    GLfloat max_speed = 400.f;
+    GLfloat max_speed = 200.f;
     GLfloat max_force = 10.f;
 
     // update all forces acting on each boid
@@ -171,13 +332,13 @@ void Flock::update(float dt)
     // apply forces to each boid
     for (unsigned int i = 0; i < count_; ++i)
     {
-        velocities_[i] += accelerations_[i];
-        velocities_[i].limit(max_speed);
+        // velocities_[i] += accelerations_[i];
+        // velocities_[i].limit(max_speed);
         
         rotations_[i] = rotation_matrix(std::atan2(velocities_[i][1], velocities_[i][0]));
 
         positions_[i] += velocities_[i] * dt;
-        accelerations_[i] *= 0.f;
+        //accelerations_[i] *= 0.f;
     }
 
     update_draw_data();
@@ -232,15 +393,15 @@ void Flock::nudge_inside_margin(unsigned int i, GLfloat nudge_factor)
     auto py = positions_[i][1];
 
     vec2 nudge{0, 0};
-    if(px < 150)
+    if(px < 250)
         nudge[0] = 1;
-    else if(px > 650)
+    else if(px > 550)
         nudge[0] = -1;
 
-    if(py < 150)
+    if(py < 250)
         nudge[1] = 1;
-    else if(py > 650)
+    else if(py > 550)
         nudge[1] = -1;
 
-    accelerations_[i] += nudge * nudge_factor;
+    velocities_[i] += nudge.normalize() * nudge_factor;
 }

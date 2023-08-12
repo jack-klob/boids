@@ -18,6 +18,12 @@ public:
 private:
     void create_data();
 
+    vec2 alignment_contribution(unsigned int i, const std::vector<unsigned int> &neighbors) const;
+
+    vec2 cohesion_contribution(unsigned int i, const std::vector<unsigned int> &neighbors) const;
+
+    vec2 separation_contribution(unsigned int i, const std::vector<unsigned int> &neighbors, GLfloat separation_distance) const;
+
     void wrap(unsigned int i);
     
     void nudge_inside_margin(unsigned int i, GLfloat nudge_factor);
