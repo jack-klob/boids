@@ -4,11 +4,23 @@
 #include <array>
 #include <GL/glew.h>
 
+/// @brief 2x2 matrix type
 using mat2 = std::array<std::array<GLfloat, 2>, 2>;
+
+/// @brief 4x4 matrix type
 using mat4 = std::array<std::array<GLfloat, 4>, 4>;
 
+/// @brief create an orthogonal matrix for projection
+/// @param left 
+/// @param right 
+/// @param bottom 
+/// @param top 
+/// @return the projection matrix
 mat4 make_ortho(const float left, const float right, const float bottom, const float top);
 
+/// @brief create a 2x2 rotation matrix
+/// @param theta the angle for the rotation (radians)
+/// @return the rotation matrix
 mat2 rotation_matrix(const float theta);
 
 /// @brief lightweight 2 element vector class
@@ -33,7 +45,6 @@ class vec2
         /// @brief copy constructor
         /// @param other vec2 to copy
         vec2(const vec2 &other);
-
 
 
         GLfloat operator[](int i) const;
