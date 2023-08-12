@@ -3,7 +3,7 @@
  set(CMAKE_CXX_STANDARD 20)
  set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
- set(OpenGL_GL_PREFERENCE GLVND)
+ set(OpenGL_GL_PREFERENCE LEGACY)
  set(Boost_NO_WARN_NEW_VERSIONS 1)
 
  # Find the required libraries (i.e., OpenGL, GLEW, and GLFW).
