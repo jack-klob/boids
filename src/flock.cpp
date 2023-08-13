@@ -63,9 +63,8 @@ void Flock::create_draw_data()
 // where 3 separate loops would be required
 void Flock::apply_rules_to_boid(unsigned int i)
 {
-    std::vector<unsigned int> neighbors{};
-
     vec2 avg_pos, avg_heading, repel;
+    int num_neighbors = 0;
 
     for (unsigned int j = 0; j < count_; ++j)
     {
@@ -74,29 +73,25 @@ void Flock::apply_rules_to_boid(unsigned int i)
 
         if (within_sight(i, j))
         {
-            neighbors.push_back(j);
+            vec2 dist_vec = positions_[i] - positions_[j];
+            auto dist = dist_vec.mag();
+            if (dist <= params_.separation_dist * params_.separation_dist)
+            {
+                // the repelling force is inversely proportional to the distance
+                // closer boids should repel more than ones further away
+                repel += dist_vec / dist;
+            }
+
+            avg_pos += positions_[j];
+            avg_heading += velocities_[j];
+            ++num_neighbors;
         }
     }
 
-    for(auto n : neighbors)
+    if(num_neighbors)
     {
-        vec2 dist_vec = positions_[i] - positions_[n];
-        auto dist = dist_vec.mag();
-        if (dist <= params_.separation_dist * params_.separation_dist)
-        {   
-            // the repelling force is inversely proportional to the distance
-            // closer boids should repel more than ones further away
-            repel += dist_vec / dist;
-        }
-
-        avg_pos += positions_[n];
-        avg_heading += velocities_[n];
-    }
-
-    if(neighbors.size())
-    {
-        avg_pos /= neighbors.size();
-        avg_heading /= neighbors.size();
+        avg_pos /= num_neighbors;
+        avg_heading /= num_neighbors;
 
         // apply cohesion
         velocities_[i] += ((avg_pos - positions_[i]).normalize() * RULE_SCALE_FACTOR * params_.cohesion_factor).limit(MAX_FORCE);
