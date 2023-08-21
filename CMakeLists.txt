@@ -10,15 +10,13 @@
  find_package(OpenGL REQUIRED)
  find_package(GLEW REQUIRED)
  find_package(Boost 1.54.0 COMPONENTS program_options REQUIRED)
- find_package(PkgConfig REQUIRED)
- pkg_search_module(GLFW REQUIRED glfw3)
+ find_package(glfw3 CONFIG REQUIRED)
 
  # Define a program target.
- add_executable(flocking_sim src/main.cpp src/shader.cpp src/flock.cpp src/gl_math.cpp)
+ add_executable(flocking_sim src/main.cpp src/shader.cpp src/flock.cpp src/gl_math.cpp src/utils.cpp)
 
  # Set the includes and libraries for the executable.
- target_include_directories(flocking_sim PUBLIC ${GLFW_INCLUDE_DIRS})
- target_link_libraries(flocking_sim ${GLFW_LIBRARIES} GLEW::GLEW OpenGL::GL Boost::program_options)
+ target_link_libraries(flocking_sim glfw GLEW::GLEW OpenGL::GL Boost::program_options)
 
  install(TARGETS flocking_sim DESTINATION bin)
  install(PROGRAMS demo DESTINATION bin)

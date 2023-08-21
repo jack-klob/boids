@@ -5,25 +5,24 @@
 #include <vector>
 #include <GL/glew.h>
 
-/// @brief struct for parameters of simulation
-struct parameters
-{
-    float cohesion_factor;
-    float alignment_factor;
-    float separation_factor;
-    int n;
-    bool wrap;
-    unsigned int seed = 0;
-    float sight_dist;
-    float sight_angle;
-    float separation_dist;
-    int height = 800;
-    int width = 800;
-};
-
 class Flock
 {
 public:
+    /// @brief struct for parameters of simulation
+    struct parameters
+    {
+        float cohesion_factor;
+        float alignment_factor;
+        float separation_factor;
+        int n;
+        bool wrap;
+        unsigned int seed = 0;
+        float sight_dist;
+        float sight_angle;
+        float separation_dist;
+        int height = 800;
+        int width = 800;
+    };
 
     /// @brief flock constructor
     /// @param params parameters to be used for the simulation
