@@ -1,5 +1,6 @@
 # Flocking Simulator
-Flocking simulation based on the [boids](https://www.red3d.com/cwr/boids/) algorithm by Craig Reynolds. Completed for SENG 475 - Advanced Programming Techniques
+
+2D bird flocking simulation written in C++ using OpenGL, GLFW, and GLEW. Based on the [boids](https://www.red3d.com/cwr/boids/) algorithm by Craig Reynolds. Completed for SENG 475 - Advanced Programming Techniques
 for Robust Efficient Computing at the University of Victoria.
 
 ## Installation
