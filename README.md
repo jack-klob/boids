@@ -1,5 +1,6 @@
 # Flocking Simulator
-Flocking simulation based on the [boids](https://www.red3d.com/cwr/boids/) algorithm by Craig Reynolds
+Flocking simulation based on the [boids](https://www.red3d.com/cwr/boids/) algorithm by Craig Reynolds. Completed for SENG 475 - Advanced Programming Techniques
+for Robust Efficient Computing at the University of Victoria.
 
 ## Installation
 Let $INSTALL_DIR denote the directory into
