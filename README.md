@@ -17,12 +17,12 @@ cmake --build tmp_cmake --clean-first --target install
 ## Running application
 The following command is used to run the application
 ```
-$INSTALL_DIR/bin/flock
+$INSTALL_DIR/bin/flocking_sim
 ```
 
 A help screen can be displayed with
 ```
-$INSTALL_DIR/bin/flock --help
+$INSTALL_DIR/bin/flocking_sim --help
 ```
 
 A demo script can be run with
